@@ -1,0 +1,232 @@
+/* =======================================
+   TRANSLOGIX
+
+   Smart Logistics Management System
+
+   Global Theme
+
+======================================= */
+
+:root{
+
+    --bg:#020617;
+
+    --sidebar:#0F172A;
+
+    --card:#111827;
+
+    --primary:#2563EB;
+
+    --secondary:#38BDF8;
+
+    --success:#22C55E;
+
+    --warning:#F59E0B;
+
+    --danger:#EF4444;
+
+    --text:#F8FAFC;
+
+    --muted:#94A3B8;
+
+    --border:#1E293B;
+
+    /* Extended surface & accent tokens used across dashboard/sidebar/navbar/shipments/employee/cards */
+
+    --surface-1:#141B2D;
+
+    --surface-2:#1D2337;
+
+    --surface-3:#2A3350;
+
+    --text-dim:#CBD5E1;
+
+    --text-strong:#FFFFFF;
+
+    --accent-purple:#7C3AED;
+
+    --accent-purple-2:#9333EA;
+
+    --accent-cyan:#00D4FF;
+
+    --accent-blue:#3B82F6;
+
+    --accent-blue-light:#60A5FA;
+
+    --success-light:#4ADE80;
+
+    --warning-light:#FBBF24;
+
+    --danger-dark:#DC2626;
+
+    --pink:#FF4D94;
+
+    --orange:#F97316;
+
+    --orange-dark:#EA580C;
+
+    --border-strong:#334155;
+
+    --overlay-bg:rgba(18,23,38,.88);
+
+    --hairline-04:rgba(255,255,255,.04);
+
+    --hairline-05:rgba(255,255,255,.05);
+
+    --hairline-06:rgba(255,255,255,.06);
+
+    --hairline-08:rgba(255,255,255,.08);
+
+}
+
+:root[data-theme="light"]{
+
+    --bg:#F1F5F9;
+
+    --sidebar:#FFFFFF;
+
+    --card:#FFFFFF;
+
+    --primary:#2563EB;
+
+    --secondary:#0891B2;
+
+    --success:#16A34A;
+
+    --warning:#D97706;
+
+    --danger:#DC2626;
+
+    --text:#0F172A;
+
+    --muted:#475569;
+
+    --border:#E2E8F0;
+
+    --surface-1:#FFFFFF;
+
+    --surface-2:#E7ECF3;
+
+    --surface-3:#DCE3ED;
+
+    --text-dim:#334155;
+
+    --text-strong:#0F172A;
+
+    --accent-purple:#7C3AED;
+
+    --accent-purple-2:#9333EA;
+
+    --accent-cyan:#0891B2;
+
+    --accent-blue:#2563EB;
+
+    --accent-blue-light:#3B82F6;
+
+    --success-light:#16A34A;
+
+    --warning-light:#D97706;
+
+    --danger-dark:#B91C1C;
+
+    --pink:#DB2777;
+
+    --orange:#EA580C;
+
+    --orange-dark:#C2410C;
+
+    --border-strong:#CBD5E1;
+
+    --overlay-bg:rgba(255,255,255,.85);
+
+    --hairline-04:rgba(15,23,42,.06);
+
+    --hairline-05:rgba(15,23,42,.07);
+
+    --hairline-06:rgba(15,23,42,.08);
+
+    --hairline-08:rgba(15,23,42,.10);
+
+}
+
+*{
+
+    margin:0;
+
+    padding:0;
+
+    box-sizing:border-box;
+
+}
+
+html{
+
+    scroll-behavior:smooth;
+
+}
+
+body{
+
+    background:var(--bg);
+
+    color:var(--text);
+
+    font-family:"Inter",sans-serif;
+
+    overflow-x:hidden;
+
+    transition:background .2s ease, color .2s ease;
+
+}
+
+h1,h2,h3,h4{
+
+    font-family:"Poppins",sans-serif;
+
+}
+
+a{
+
+    text-decoration:none;
+
+    color:inherit;
+
+}
+
+button{
+
+    cursor:pointer;
+
+    border:none;
+
+    font-family:inherit;
+
+}
+
+input{
+
+    font-family:inherit;
+
+    outline:none;
+
+}
+
+::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:var(--border-strong);
+
+    border-radius:10px;
+
+}
+
+::-webkit-scrollbar-track{
+
+    background:var(--surface-1);
+
+}

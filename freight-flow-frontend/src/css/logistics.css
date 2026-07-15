@@ -1,0 +1,92 @@
+.logi-page {
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.logi-section {
+  background: var(--card, #161616);
+  border: 1px solid var(--border, #2a2a2a);
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.logi-section h3 {
+  margin: 0 0 14px 0;
+  font-size: 1.05rem;
+}
+
+.logi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.logi-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.logi-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 160px;
+}
+
+.logi-field label {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.logi-field input,
+.logi-field select {
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--hairline-08, #333);
+  background: var(--surface-2, #1a1a1a);
+  color: inherit;
+  padding: 0 10px;
+}
+
+.logi-quote-box {
+  margin-top: 10px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: var(--surface-2, #1a1a1a);
+  border: 1px dashed var(--hairline-08, #444);
+  font-size: 0.9rem;
+}
+
+.logi-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.logi-tab {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--hairline-08, #333);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.logi-tab.active {
+  background: var(--accent-purple, #7c5cff);
+  border-color: transparent;
+}
+
+.logi-status-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  background: rgba(124, 92, 255, 0.15);
+  color: var(--accent-purple, #7c5cff);
+}

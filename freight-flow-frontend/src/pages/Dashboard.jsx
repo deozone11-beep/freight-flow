@@ -1,0 +1,365 @@
+import { useState, useEffect } from "react";
+import "../css/dashboard.css";
+import "../css/cards.css";
+import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
+import StatCard from "../components/StatCard";
+import ShipmentChart from "../components/ShipmentChart";
+import { getDashboardStats } from "../api/dashboard";
+
+import {
+  Truck,
+  Package,
+  Warehouse,
+  Users,
+  TrendingUp,
+  CircleCheck,
+  Clock3,
+  TriangleAlert,
+} from "lucide-react";
+
+function Dashboard() {
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    getDashboardStats()
+      .then(setStats)
+      .catch(() => {
+        // fall back to placeholder values below if the API isn't reachable
+      });
+  }, []);
+
+  const cards = [
+    {
+      title: "Warehouse Regions",
+      value: stats ? String(stats.warehouseRegions) : "-",
+      change: "Live from server",
+      color: "#2563eb",
+      icon: <Package size={28} />,
+    },
+    {
+      title: "Component Stock",
+      value: stats ? stats.totalComponentStock.toLocaleString() : "-",
+      change: "Live from server",
+      color: "#0f766e",
+      icon: <Warehouse size={28} />,
+    },
+    {
+      title: "Total Employees",
+      value: stats ? String(stats.totalEmployees) : "-",
+      change: "Live from server",
+      color: "#9333ea",
+      icon: <Users size={28} />,
+    },
+    {
+      title: "Wholesale Orders",
+      value: stats ? String(stats.totalDomesticDispatches + stats.totalInternationalImports) : "-",
+      change: "Live from server",
+      color: "#ea580c",
+      icon: <Truck size={28} />,
+    },
+  ];
+
+  const inbox = [
+    {
+      title: "Supplier delay",
+      description: "Component shipment from Korea is delayed by 6 hours.",
+      time: "10 min ago",
+      status: "info",
+    },
+    {
+      title: "Assembly alert",
+      description: "Line 3 needs urgent calibration before next batch.",
+      time: "30 min ago",
+      status: "urgent",
+    },
+    {
+      title: "Quality pass",
+      description: "New batch of phone housings passed inspection.",
+      time: "1h ago",
+      status: "update",
+    },
+    {
+      title: "Dispatch ready",
+      description: "Wholesale order PO-1021 is loaded and ready.",
+      time: "2h ago",
+      status: "alert",
+    },
+  ];
+
+  const departments = [
+    { name: "Procurement", info: "Manage supplier shipments" },
+    { name: "Production", info: "Run assembly lines" },
+    { name: "Quality", info: "Oversee inspection" },
+    { name: "Logistics", info: "Coordinate dispatch" },
+    { name: "Support", info: "Manage customer handoff" },
+  ];
+
+  const departmentActions = [
+    "Select action",
+    "View team",
+    "Assign task",
+    "Open dashboard",
+    "Review metrics",
+  ];
+
+  const [departmentSelection, setDepartmentSelection] = useState(
+    Array(departments.length).fill("Select action")
+  );
+
+  const handleDepartmentChange = (index, event) => {
+    const updated = [...departmentSelection];
+    updated[index] = event.target.value;
+    setDepartmentSelection(updated);
+  };
+
+  return (
+    <div className="dashboard">
+
+      <Sidebar />
+
+      <div className="dashboard-content">
+
+        <Navbar title="Manufacturing Dashboard" />
+
+        {/* KPI CARDS */}
+
+        <section className="cards">
+          {cards.map((card, index) => (
+            <StatCard
+              key={index}
+              title={card.title}
+              value={card.value}
+              change={card.change}
+              color={card.color}
+              icon={card.icon}
+            />
+          ))}
+        </section>
+
+        {/* CHART + FLEET */}
+
+        <section className="dashboard-grid">
+
+          <div className="panel large">
+
+            <div className="panel-header">
+              <h3>Production Performance</h3>
+            </div>
+
+            <ShipmentChart />
+
+          </div>
+
+          <div className="panel">
+
+            <div className="panel-header">
+              <h3>Transport Fleet</h3>
+            </div>
+
+            <div className="status">
+
+              <div className="status-item">
+
+                <CircleCheck color="#22c55e" size={24} />
+
+                <div>
+                  <h4>{stats ? stats.vehiclesActive : "-"}</h4>
+                  <p>Vehicles Active</p>
+                </div>
+
+              </div>
+
+              <div className="status-item">
+
+                <Clock3 color="#f59e0b" size={24} />
+
+                <div>
+                  <h4>{stats ? stats.totalVehicles - stats.vehiclesActive - stats.vehiclesInMaintenance : "-"}</h4>
+                  <p>In Transit</p>
+                </div>
+
+              </div>
+
+              <div className="status-item">
+
+                <TriangleAlert color="#ef4444" size={24} />
+
+                <div>
+                  <h4>{stats ? stats.vehiclesInMaintenance : "-"}</h4>
+                  <p>Maintenance</p>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        {/* TABLE + BUSINESS */}
+
+        <section className="bottom-grid">
+
+          <div className="panel">
+
+            <div className="panel-header">
+              <h3>Wholesale Orders</h3>
+            </div>
+
+            <table>
+
+              <thead>
+
+                <tr>
+                  <th>ID</th>
+                  <th>Client</th>
+                  <th>Status</th>
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                <tr>
+                  <td>PO-1021</td>
+                  <td>Metro Retail</td>
+                  <td>
+                    <span className="badge delivered">
+                      Delivered
+                    </span>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>PO-1022</td>
+                  <td>Avante Stores</td>
+                  <td>
+                    <span className="badge transit">
+                      In Transit
+                    </span>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>PO-1023</td>
+                  <td>SmartTech Wholesale</td>
+                  <td>
+                    <span className="badge pending">
+                      Pending
+                    </span>
+                  </td>
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+          <div className="panel">
+
+            <div className="panel-header">
+              <h3>Business Growth</h3>
+            </div>
+
+            <div className="growth">
+
+              <TrendingUp
+                size={60}
+                color="#22c55e"
+              />
+
+              <h1>+18.4%</h1>
+
+              <p>Compared to last month</p>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        {/* QUICK ACTIONS */}
+
+        <section className="quick-grid">
+
+          <div className="panel">
+
+            <div className="panel-header">
+              <h3>Quick Actions</h3>
+            </div>
+
+            <div className="action-buttons">
+
+              <button>➕ Add Component Batch</button>
+
+              <button>🛠️ Start Assembly Line</button>
+
+              <button>📦 Create Wholesale Order</button>
+
+              <button>📊 Run QA Check</button>
+
+            </div>
+
+          </div>
+
+          <div className="panel">
+
+            <div className="panel-header">
+              <h3>Departments</h3>
+            </div>
+
+            <div className="department-list">
+              {departments.map((dept, index) => (
+                <div className="department-item" key={dept.name}>
+                  <div>
+                    <h4>{dept.name}</h4>
+                    <p>{dept.info}</p>
+                  </div>
+                  <select
+                    value={departmentSelection[index]}
+                    onChange={(event) => handleDepartmentChange(index, event)}
+                  >
+                    {departmentActions.map((action) => (
+                      <option key={action} value={action}>
+                        {action}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+            </div>
+
+          </div>
+
+        </section>
+
+        <section className="inbox-grid">
+          <div className="panel">
+            <div className="panel-header">
+              <h3>Operations Inbox</h3>
+            </div>
+
+            <div className="message-list">
+              {inbox.map((item, index) => (
+                <div className={`message-item ${item.status}`} key={index}>
+                  <div>
+                    <h4>{item.title}</h4>
+                    <p>{item.description}</p>
+                  </div>
+                  <span>{item.time}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+    </div>
+  );
+}
+
+export default Dashboard;
