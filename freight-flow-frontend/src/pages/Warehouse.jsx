@@ -3,13 +3,18 @@ import "../css/dashboard.css";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import { getWarehouseRegions } from "../api/warehouse";
+import { getDashboardStats } from "../api/dashboard";
 
 function Warehouse() {
   const [storage, setStorage] = useState([]);
+  const [stats, setStats] = useState(null);
 
   useEffect(() => {
     getWarehouseRegions()
       .then(setStorage)
+      .catch(() => {});
+    getDashboardStats()
+      .then(setStats)
       .catch(() => {});
   }, []);
 
@@ -24,9 +29,9 @@ function Warehouse() {
         <section className="cards">
           <div className="dashboard-card">
             <div className="card-left">
-              <p>Supplier Countries</p>
-              <h2>8</h2>
-              <span className="change">Importing from multiple markets</span>
+              <p>Warehouse Regions</p>
+              <h2>{storage.length || "-"}</h2>
+              <span className="change">Live from server</span>
             </div>
             <div className="icon" style={{ background: "#9333ea" }}>
               W
@@ -44,9 +49,9 @@ function Warehouse() {
           </div>
           <div className="dashboard-card">
             <div className="card-left">
-              <p>Assembly Lines</p>
-              <h2>6</h2>
-              <span className="change">Active phone build lanes</span>
+              <p>Total Vehicles</p>
+              <h2>{stats ? stats.totalVehicles : "-"}</h2>
+              <span className="change">Fleet count from server</span>
             </div>
             <div className="icon" style={{ background: "#0f766e" }}>
               I
@@ -54,9 +59,9 @@ function Warehouse() {
           </div>
           <div className="dashboard-card">
             <div className="card-left">
-              <p>Wholesale Orders</p>
-              <h2>84</h2>
-              <span className="change">Ready for dispatch</span>
+              <p>Total Orders</p>
+              <h2>{stats ? stats.totalDomesticDispatches + stats.totalInternationalImports : "-"}</h2>
+              <span className="change">Domestic + International</span>
             </div>
             <div className="icon" style={{ background: "#ea580c" }}>
               D

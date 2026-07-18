@@ -7,5 +7,6 @@ import lombok.Data;
 @AllArgsConstructor
 public class CaptchaResponse {
     private String captchaId;
-    private String text;
+    private String captchaImage;
+    private String audioObfuscatedText;
 }

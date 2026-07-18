@@ -21,15 +21,16 @@ public class PasswordResetService {
     private final JavaMailSender mailSender;
     private final SecureRandom secureRandom = new SecureRandom();
 
-    @Value("${app.frontend-url}")
+    @Value("${app.frontend-url:http://localhost:5173}")
     private String frontendUrl;
 
-    @Value("${spring.mail.username}")
+    @Value("${spring.mail.username:}")
     private String fromAddress;
 
-    public PasswordResetService(UserRepository userRepository, JavaMailSender mailSender) {
+    public PasswordResetService(UserRepository userRepository, 
+                                org.springframework.beans.factory.ObjectProvider<JavaMailSender> mailSenderProvider) {
         this.userRepository = userRepository;
-        this.mailSender = mailSender;
+        this.mailSender = mailSenderProvider.getIfAvailable();
     }
 
     public void createAndSend(User user) {
@@ -41,13 +42,30 @@ public class PasswordResetService {
         user.setPasswordResetExpiresAt(Instant.now().plus(30, ChronoUnit.MINUTES));
         userRepository.save(user);
 
-        String resetUrl = frontendUrl + "/reset-password?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8);
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromAddress);
-        message.setTo(user.getEmail());
-        message.setSubject("FreightFlow password reset");
-        message.setText("Use this link to reset your password. It expires in 30 minutes:\n\n" + resetUrl);
-        mailSender.send(message);
+        String activeFrontendUrl = (frontendUrl == null || frontendUrl.isEmpty() || frontendUrl.startsWith("${"))
+                ? "http://localhost:5173"
+                : frontendUrl;
+
+        String resetUrl = activeFrontendUrl + "/reset-password?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8);
+
+        if (mailSender != null && fromAddress != null && !fromAddress.isEmpty() && !fromAddress.startsWith("${")) {
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setFrom(fromAddress);
+                message.setTo(user.getEmail());
+                message.setSubject("FreightFlow password reset");
+                message.setText("Use this link to reset your password. It expires in 30 minutes:\n\n" + resetUrl);
+                mailSender.send(message);
+            } catch (Exception ex) {
+                System.err.println("Failed to send email. Logging link instead: " + resetUrl);
+                ex.printStackTrace();
+            }
+        } else {
+            System.out.println("==========================================================================");
+            System.out.println("MAIL SENDER NOT CONFIGURED or MAIL_USERNAME MISSING. Logging Reset URL:");
+            System.out.println(resetUrl);
+            System.out.println("==========================================================================");
+        }
     }
 
     public User consumeToken(String token) {

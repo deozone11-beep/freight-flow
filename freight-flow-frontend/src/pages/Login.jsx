@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import logo from "../assets/logo.png";
 import worldMap from "../assets/world-map.png";
 import truck from "../assets/truck.png";
@@ -7,7 +7,6 @@ import "../css/login.css";
 import { login, getCaptcha, forgotPassword } from "../api/auth";
 import { roleHome } from "../utils/roleHome";
 import Modal from "../components/Modal";
-import CaptchaCanvas from "../components/CaptchaCanvas";
 
 import {
   Package,
@@ -26,13 +25,14 @@ function Login() {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [username, setUsername] = useState("admin");
-  const [password, setPassword] = useState("admin123");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [captchaId, setCaptchaId] = useState("");
   const [captchaText, setCaptchaText] = useState("");
+  const [captchaImage, setCaptchaImage] = useState("");
   const [captchaAnswer, setCaptchaAnswer] = useState("");
 
   const [showForgotModal, setShowForgotModal] = useState(false);
@@ -40,16 +40,29 @@ function Login() {
   const [forgotMessage, setForgotMessage] = useState("");
   const [forgotLoading, setForgotLoading] = useState(false);
 
+  const canvasRef = useRef(null);
+
   const loadCaptcha = () => {
     setCaptchaText("");
+    setCaptchaImage("");
     getCaptcha()
       .then((data) => {
         setCaptchaId(data.captchaId);
-        setCaptchaText(data.text);
+        if (data.captchaImage) {
+          setCaptchaImage(data.captchaImage);
+          try {
+            setCaptchaText(window.atob(data.audioObfuscatedText));
+          } catch (e) {
+            setCaptchaText("");
+          }
+        } else if (data.text) {
+          setCaptchaText(data.text);
+        }
         setCaptchaAnswer("");
       })
       .catch(() => {
         setCaptchaText("ERROR");
+        setCaptchaImage("");
       });
   };
 
@@ -64,6 +77,69 @@ function Login() {
   useEffect(() => {
     loadCaptcha();
   }, []);
+
+  useEffect(() => {
+    if (captchaImage || !captchaText || captchaText === "ERROR") return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    const width = 160;
+    const height = 58;
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+    ctx.scale(dpr, dpr);
+
+    // Background
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, width, height);
+
+    // Draw noise lines
+    const lineColors = ["#ef4444", "#3b82f6", "#22c55e", "#f59e0b", "#a855f7", "#ec4899"];
+    for (let i = 0; i < 6; i++) {
+      ctx.strokeStyle = lineColors[i % lineColors.length];
+      ctx.globalAlpha = 0.5;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(Math.random() * width, Math.random() * height);
+      ctx.lineTo(Math.random() * width, Math.random() * height);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    // Noise dots
+    for (let i = 0; i < 40; i++) {
+      ctx.fillStyle = lineColors[Math.floor(Math.random() * lineColors.length)];
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath();
+      ctx.arc(Math.random() * width, Math.random() * height, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // Characters
+    const colors = ["#1e3a8a", "#7c2d12", "#166534", "#581c87", "#9d174d", "#0c4a6e"];
+    const charWidth = width / (captchaText.length + 1);
+    captchaText.split("").forEach((ch, i) => {
+      const x = charWidth * (i + 1);
+      const y = height / 2 + (Math.random() * 10 - 5);
+      const angle = (Math.random() * 40 - 20) * (Math.PI / 180);
+      const size = 20 + Math.random() * 5;
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.font = `800 ${size}px Poppins, sans-serif`;
+      ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(ch, 0, 0);
+      ctx.restore();
+    });
+  }, [captchaText, captchaImage]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -322,8 +398,10 @@ function Login() {
 
               <div className="captcha-row">
                 <div className="captcha-image-box">
-                  {captchaText ? (
-                    <CaptchaCanvas text={captchaText} />
+                  {captchaImage ? (
+                    <img src={`data:image/png;base64,${captchaImage}`} alt="CAPTCHA" className="captcha-img" />
+                  ) : captchaText && captchaText !== "ERROR" ? (
+                    <canvas ref={canvasRef} className="captcha-img" />
                   ) : (
                     <span className="captcha-loading">Loading...</span>
                   )}

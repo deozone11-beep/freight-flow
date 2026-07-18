@@ -6,6 +6,12 @@ import java.security.SecureRandom;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import javax.imageio.ImageIO;
+import java.util.Base64;
+import java.util.Random;
 
 @Service
 public class CaptchaService {
@@ -38,19 +44,25 @@ public class CaptchaService {
 
     public static class Captcha {
         private final String captchaId;
-        private final String text;
+        private final String captchaImage; // Base64 PNG image
+        private final String audioObfuscatedText; // Base64 encoded plaintext
 
-        public Captcha(String captchaId, String text) {
+        public Captcha(String captchaId, String captchaImage, String audioObfuscatedText) {
             this.captchaId = captchaId;
-            this.text = text;
+            this.captchaImage = captchaImage;
+            this.audioObfuscatedText = audioObfuscatedText;
         }
 
         public String getCaptchaId() {
             return captchaId;
         }
 
-        public String getText() {
-            return text;
+        public String getCaptchaImage() {
+            return captchaImage;
+        }
+
+        public String getAudioObfuscatedText() {
+            return audioObfuscatedText;
         }
     }
 
@@ -65,7 +77,78 @@ public class CaptchaService {
         store.put(id, new CaptchaEntry(text, System.currentTimeMillis() + TTL_MS));
         cleanupExpired();
 
-        return new Captcha(id, text);
+        String captchaImage = generateImageBase64(text);
+        String audioObfuscatedText = Base64.getEncoder().encodeToString(text.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+        return new Captcha(id, captchaImage, audioObfuscatedText);
+    }
+
+    private String generateImageBase64(String text) {
+        int width = 160;
+        int height = 58;
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = image.createGraphics();
+        
+        // Anti-aliasing
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        
+        // Background
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, width, height);
+        
+        // Draw noise lines
+        Random rand = new Random();
+        Color[] lineColors = {Color.RED, Color.BLUE, Color.GREEN, Color.ORANGE, Color.MAGENTA};
+        for (int i = 0; i < 6; i++) {
+            g.setColor(lineColors[i % lineColors.length]);
+            g.setStroke(new BasicStroke(1));
+            g.drawLine(rand.nextInt(width), rand.nextInt(height), rand.nextInt(width), rand.nextInt(height));
+        }
+        
+        // Draw noise dots
+        for (int i = 0; i < 40; i++) {
+            g.setColor(lineColors[rand.nextInt(lineColors.length)]);
+            g.fillOval(rand.nextInt(width), rand.nextInt(height), 2, 2);
+        }
+        
+        // Characters, each rotated/offset/colored independently
+        Color[] charColors = {
+            new Color(30, 58, 138),
+            new Color(124, 45, 18),
+            new Color(22, 101, 52),
+            new Color(88, 28, 135),
+            new Color(157, 23, 77),
+            new Color(12, 74, 110)
+        };
+        
+        g.setFont(new Font("Poppins", Font.BOLD, 22));
+        int charWidth = width / (text.length() + 1);
+        for (int i = 0; i < text.length(); i++) {
+            String ch = String.valueOf(text.charAt(i));
+            int x = charWidth * (i + 1);
+            int y = height / 2 + (rand.nextInt(10) - 5) + 6; // +6 to adjust vertical centering of letters
+            
+            // Set rotation
+            double angle = (rand.nextInt(40) - 20) * (Math.PI / 180.0);
+            g.translate(x, y);
+            g.rotate(angle);
+            g.setColor(charColors[rand.nextInt(charColors.length)]);
+            g.drawString(ch, -8, 0); // draw string relative to translate origin
+            
+            // Restore rotation
+            g.rotate(-angle);
+            g.translate(-x, -y);
+        }
+        
+        g.dispose();
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(image, "png", baos);
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException("Failed to write captcha image", e);
+        }
+        return Base64.getEncoder().encodeToString(baos.toByteArray());
     }
 
     // Single-use: the captcha is consumed (removed) whether or not it matches.

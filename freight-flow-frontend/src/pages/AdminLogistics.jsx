@@ -20,7 +20,9 @@ import {
   createWarehouse,
   updateWarehouse,
   listAllDeliveryRequests,
+  listWarehouseStock,
 } from "../api/delivery";
+import { listCustomers } from "../api/admin";
 
 function AdminLogistics() {
   const [tab, setTab] = useState("warehouses");
@@ -30,6 +32,8 @@ function AdminLogistics() {
   const [orders, setOrders] = useState([]);
   const [pickups, setPickups] = useState([]);
   const [deliveries, setDeliveries] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [stock, setStock] = useState([]);
   const [trackingId, setTrackingId] = useState(null);
 
   const [showWarehouseModal, setShowWarehouseModal] = useState(false);
@@ -46,6 +50,8 @@ function AdminLogistics() {
     listAllRentalOrders().then(setOrders).catch(() => {});
     listAllPickupTasks().then(setPickups).catch(() => {});
     listAllDeliveryRequests().then(setDeliveries).catch(() => {});
+    listCustomers().then(setCustomers).catch(() => {});
+    listWarehouseStock().then(setStock).catch(() => {});
   };
 
   useEffect(load, []);
@@ -136,7 +142,7 @@ function AdminLogistics() {
 
         <div className="logi-page">
           <div className="logi-tabs">
-            {["warehouses", "pricing", "orders", "tracking"].map((t) => (
+            {["customers", "warehouses", "pricing", "orders", "tracking"].map((t) => (
               <button key={t} className={`logi-tab ${tab === t ? "active" : ""}`} onClick={() => setTab(t)}>
                 {t[0].toUpperCase() + t.slice(1)}
               </button>
@@ -167,6 +173,28 @@ function AdminLogistics() {
               <p style={{ fontSize: "0.78rem", opacity: 0.6, marginTop: 8 }}>
                 Tip: create a WAREHOUSE_MANAGER user first (via Employees/User Management), then enter their user ID here.
               </p>
+            </div>
+          )}
+
+          {tab === "customers" && (
+            <div className="logi-section">
+              <h3>Customer Details & Requests</h3>
+              <div className="shipment-table">
+                <table>
+                  <thead><tr><th>Customer</th><th>Username</th><th>Email</th><th>Phone</th><th>Status</th><th>Joined</th></tr></thead>
+                  <tbody>
+                    {customers.map((customer) => (
+                      <tr key={customer.id}>
+                        <td>{customer.fullName}</td><td>{customer.username}</td><td>{customer.email || "—"}</td>
+                        <td>{customer.phoneNumber || "—"}</td><td>{customer.active ? "Active" : "Inactive"}</td>
+                        <td>{customer.createdAt ? new Date(customer.createdAt).toLocaleDateString() : "—"}</td>
+                      </tr>
+                    ))}
+                    {customers.length === 0 && <tr><td colSpan={6}>No registered customers yet.</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+              <p style={{ fontSize: "0.78rem", opacity: 0.65, marginTop: 10 }}>Rental and delivery requests are in the Orders tab; employee accounts are managed in User Management.</p>
             </div>
           )}
 
@@ -236,6 +264,16 @@ function AdminLogistics() {
 
           {tab === "orders" && (
             <>
+              <div className="logi-section">
+                <h3>Storage Details — all warehouses</h3>
+                <div className="shipment-table"><table>
+                  <thead><tr><th>Warehouse</th><th>Customer</th><th>Product</th><th>Quantity Stored</th><th>Storage Rate / Unit</th></tr></thead>
+                  <tbody>
+                    {stock.map((item) => <tr key={item.id}><td>{warehouses.find((w) => w.id === item.warehouseId)?.name || `#${item.warehouseId}`}</td><td>#{item.customerId}</td><td>{productName(item.productId)}</td><td>{item.quantity}</td><td>₹{item.ratePerUnit}</td></tr>)}
+                    {stock.length === 0 && <tr><td colSpan={5}>No stored products yet.</td></tr>}
+                  </tbody>
+                </table></div>
+              </div>
               <div className="logi-section">
                 <h3>All Rental Orders</h3>
                 <div className="shipment-table">

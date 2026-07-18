@@ -16,14 +16,18 @@ client.interceptors.request.use((config) => {
   return config;
 });
 
-// If token expired/invalid, kick back to login
+// If token expired/invalid, kick back to login (but not for auth endpoints themselves)
 client.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location.href = "/";
+      const url = error.config?.url || "";
+      // Don't redirect on auth endpoints — those errors are expected (bad creds, captcha, etc.)
+      if (!url.includes("/auth/")) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/";
+      }
     }
     return Promise.reject(error);
   }

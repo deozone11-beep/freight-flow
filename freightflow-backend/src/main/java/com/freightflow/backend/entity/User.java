@@ -5,6 +5,9 @@ import lombok.*;
 
 import java.time.Instant;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 @Entity
 @Table(name = "app_user")
 @Getter
@@ -22,7 +25,7 @@ public class User {
     private String username;
 
     @Column(nullable = false)
-    private String password; // BCrypt hashed
+    private String password; // BCrypt hashed password
 
     @Column(nullable = false)
     private String fullName;
@@ -32,16 +35,35 @@ public class User {
 
     @Column(nullable = false)
     @Builder.Default
-    private String role = "ADMIN"; // ADMIN, MANAGER, STAFF, WAREHOUSE_MANAGER, DRIVER, CUSTOMER, COMPANY
+    private String role = "ADMIN";
 
     @Column(nullable = false)
     @Builder.Default
     private boolean mustChangePassword = false;
 
-    // DB id of the Employee this login belongs to (null for the system admin account)
+    // Employee table reference (null for system admin)
     private Long employeeRecordId;
+
+    // Customer mapping
+    private Long customerId;
+
+    // Warehouse mapping
+    private Long warehouseId;
+
+    // Driver mapping
+    private Long driverId;
+
+    private String phoneNumber;
+
+    private Boolean active = true;
 
     private String passwordResetTokenHash;
 
     private Instant passwordResetExpiresAt;
+
+    @CreationTimestamp
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    private Instant updatedAt;
 }

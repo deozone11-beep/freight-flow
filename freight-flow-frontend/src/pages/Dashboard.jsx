@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "../css/dashboard.css";
 import "../css/cards.css";
 import Sidebar from "../components/Sidebar";
@@ -6,6 +7,7 @@ import Navbar from "../components/Navbar";
 import StatCard from "../components/StatCard";
 import ShipmentChart from "../components/ShipmentChart";
 import { getDashboardStats } from "../api/dashboard";
+import { getDomesticShipments } from "../api/domesticShipments";
 
 import {
   Truck,
@@ -19,14 +21,17 @@ import {
 } from "lucide-react";
 
 function Dashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
+  const [dispatches, setDispatches] = useState([]);
 
   useEffect(() => {
     getDashboardStats()
       .then(setStats)
-      .catch(() => {
-        // fall back to placeholder values below if the API isn't reachable
-      });
+      .catch(() => {});
+    getDomesticShipments()
+      .then((data) => setDispatches(data.slice(0, 5)))
+      .catch(() => {});
   }, []);
 
   const cards = [
@@ -222,35 +227,21 @@ function Dashboard() {
 
               <tbody>
 
-                <tr>
-                  <td>PO-1021</td>
-                  <td>Metro Retail</td>
-                  <td>
-                    <span className="badge delivered">
-                      Delivered
-                    </span>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>PO-1022</td>
-                  <td>Avante Stores</td>
-                  <td>
-                    <span className="badge transit">
-                      In Transit
-                    </span>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>PO-1023</td>
-                  <td>SmartTech Wholesale</td>
-                  <td>
-                    <span className="badge pending">
-                      Pending
-                    </span>
-                  </td>
-                </tr>
+                {dispatches.length > 0 ? dispatches.map((d) => (
+                  <tr key={d.id}>
+                    <td>{d.orderId}</td>
+                    <td>{d.wholesalePartner}</td>
+                    <td>
+                      <span className={`badge ${d.status?.toLowerCase().replace(/\s+/g, "-")}`}>
+                        {d.status}
+                      </span>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr>
+                    <td colSpan={3} style={{ opacity: 0.6 }}>No dispatches yet</td>
+                  </tr>
+                )}
 
               </tbody>
 
@@ -293,13 +284,13 @@ function Dashboard() {
 
             <div className="action-buttons">
 
-              <button>➕ Add Component Batch</button>
+              <button onClick={() => navigate("/shipments/international")}>➕ Add Component Batch</button>
 
-              <button>🛠️ Start Assembly Line</button>
+              <button onClick={() => navigate("/warehouse")}>🛠️ Warehouse Overview</button>
 
-              <button>📦 Create Wholesale Order</button>
+              <button onClick={() => navigate("/shipments/domestic")}>📦 Create Wholesale Order</button>
 
-              <button>📊 Run QA Check</button>
+              <button onClick={() => navigate("/reports")}>📊 View Reports</button>
 
             </div>
 

@@ -774,13 +774,27 @@ form label{
 
     background:#ffffff;
 
-    border-radius:14px;
+    border-radius:16px;
 
     overflow:hidden;
 
     line-height:0;
 
     flex-shrink:0;
+
+}
+
+.captcha-img {
+
+    width:160px;
+
+    height:58px;
+
+    display:block;
+
+    border-radius:16px;
+
+    object-fit:cover;
 
 }
 
@@ -794,7 +808,7 @@ form label{
 
     width:160px;
 
-    height:52px;
+    height:58px;
 
     color:#111522;
 
@@ -804,9 +818,9 @@ form label{
 
 .captcha-icon-btn{
 
-    width:40px;
+    width:58px;
 
-    height:40px;
+    height:58px;
 
     flex-shrink:0;
 
@@ -820,7 +834,7 @@ form label{
 
     border:1px solid #f59e0b;
 
-    border-radius:10px;
+    border-radius:16px;
 
     color:#f59e0b;
 

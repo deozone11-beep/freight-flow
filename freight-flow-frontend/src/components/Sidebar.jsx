@@ -100,7 +100,7 @@ function Sidebar() {
       <div className="sidebar-bottom">
         <div className="sidebar-profile-card" onClick={() => navigate("/profile")} style={{ cursor: "pointer" }}>
           <div className="avatar">
-            A
+            {storedUser?.fullName?.charAt(0)?.toUpperCase() || "U"}
           </div>
 
           <div className="profile-info">

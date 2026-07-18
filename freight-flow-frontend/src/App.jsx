@@ -22,6 +22,9 @@ import AdminLogistics from "./pages/AdminLogistics";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { roleHome } from "./utils/roleHome";
 
+const ADMIN_ROLES = ["ADMIN", "MANAGER", "STAFF"];
+const ALL_ROLES = ["ADMIN", "MANAGER", "STAFF", "CUSTOMER", "COMPANY", "DRIVER", "WAREHOUSE_MANAGER"];
+
 function App() {
   const storedUser = JSON.parse(localStorage.getItem("user") || "null");
 
@@ -30,25 +33,31 @@ function App() {
 
       <Route path="/" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/employees" element={<ProtectedRoute><Employees /></ProtectedRoute>} />
-      <Route path="/shipments" element={<ProtectedRoute><Shipments /></ProtectedRoute>} />
-      <Route path="/shipments/domestic" element={<ProtectedRoute><DomesticShipment /></ProtectedRoute>} />
-      <Route path="/shipments/international" element={<ProtectedRoute><InternationalShipment /></ProtectedRoute>} />
-      <Route path="/fleet" element={<ProtectedRoute><Fleet /></ProtectedRoute>} />
-      <Route path="/warehouse" element={<ProtectedRoute><Warehouse /></ProtectedRoute>} />
-      <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-      <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-      <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/customer" element={<ProtectedRoute><CustomerDashboard /></ProtectedRoute>} />
-      <Route path="/company" element={<ProtectedRoute><CompanyDashboard /></ProtectedRoute>} />
-      <Route path="/driver" element={<ProtectedRoute><DriverDashboard /></ProtectedRoute>} />
-      <Route path="/manager" element={<ProtectedRoute><ManagerDashboard /></ProtectedRoute>} />
-      <Route path="/logistics" element={<ProtectedRoute><AdminLogistics /></ProtectedRoute>} />
-      <Route path="*" element={<Navigate to={storedUser ? roleHome(storedUser.role) : "/"} replace />} />
 
+      {/* Admin-only pages */}
+      <Route path="/dashboard" element={<ProtectedRoute allowedRoles={ADMIN_ROLES}><Dashboard /></ProtectedRoute>} />
+      <Route path="/employees" element={<ProtectedRoute allowedRoles={["ADMIN"]}><Employees /></ProtectedRoute>} />
+      <Route path="/shipments" element={<ProtectedRoute allowedRoles={ADMIN_ROLES}><Shipments /></ProtectedRoute>} />
+      <Route path="/shipments/domestic" element={<ProtectedRoute allowedRoles={ADMIN_ROLES}><DomesticShipment /></ProtectedRoute>} />
+      <Route path="/shipments/international" element={<ProtectedRoute allowedRoles={ADMIN_ROLES}><InternationalShipment /></ProtectedRoute>} />
+      <Route path="/fleet" element={<ProtectedRoute allowedRoles={ADMIN_ROLES}><Fleet /></ProtectedRoute>} />
+      <Route path="/warehouse" element={<ProtectedRoute allowedRoles={ADMIN_ROLES}><Warehouse /></ProtectedRoute>} />
+      <Route path="/reports" element={<ProtectedRoute allowedRoles={ADMIN_ROLES}><Reports /></ProtectedRoute>} />
+      <Route path="/logistics" element={<ProtectedRoute allowedRoles={["ADMIN"]}><AdminLogistics /></ProtectedRoute>} />
+
+      {/* Shared pages — all roles can access */}
+      <Route path="/settings" element={<ProtectedRoute allowedRoles={ALL_ROLES}><Settings /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute allowedRoles={ALL_ROLES}><Profile /></ProtectedRoute>} />
+      <Route path="/change-password" element={<ProtectedRoute allowedRoles={ALL_ROLES}><ChangePassword /></ProtectedRoute>} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+
+      {/* Role-specific dashboards */}
+      <Route path="/customer" element={<ProtectedRoute allowedRoles={["CUSTOMER"]}><CustomerDashboard /></ProtectedRoute>} />
+      <Route path="/company" element={<ProtectedRoute allowedRoles={["COMPANY"]}><CompanyDashboard /></ProtectedRoute>} />
+      <Route path="/driver" element={<ProtectedRoute allowedRoles={["DRIVER"]}><DriverDashboard /></ProtectedRoute>} />
+      <Route path="/manager" element={<ProtectedRoute allowedRoles={["WAREHOUSE_MANAGER"]}><ManagerDashboard /></ProtectedRoute>} />
+
+      <Route path="*" element={<Navigate to={storedUser ? roleHome(storedUser.role) : "/"} replace />} />
     </Routes>
   );
 }

@@ -27,9 +27,12 @@ public class Warehouse {
 
     private Double longitude;
 
-    // User.id of the WAREHOUSE_MANAGER assigned to this warehouse (nullable until assigned)
+    private Double serviceRadius;
+
+    private Integer priority;
+
     private Long managerUserId;
 
     @Builder.Default
-    private String status = "Active"; // Active, Inactive
+    private String status = "Active";
 }

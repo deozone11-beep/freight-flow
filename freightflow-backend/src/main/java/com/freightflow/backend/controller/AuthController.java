@@ -65,7 +65,7 @@ public class AuthController {
     @GetMapping("/captcha")
     public CaptchaResponse captcha() {
         CaptchaService.Captcha c = captchaService.generate();
-        return new CaptchaResponse(c.getCaptchaId(), c.getText());
+        return new CaptchaResponse(c.getCaptchaId(), c.getCaptchaImage(), c.getAudioObfuscatedText());
     }
 
     @PostMapping("/login")

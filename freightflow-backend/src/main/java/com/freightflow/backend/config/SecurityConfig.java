@@ -60,8 +60,9 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/change-password").authenticated()
+                .requestMatchers("/api/auth/me").authenticated()
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/employees/**").permitAll()
+                .requestMatchers("/api/employees/**").hasRole("ADMIN")
                 .requestMatchers("/actuator/health").permitAll()
                 .anyRequest().authenticated()
             )
